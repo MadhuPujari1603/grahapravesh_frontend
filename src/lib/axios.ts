@@ -1,7 +1,9 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import toast from "react-hot-toast";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://grahapravesh-f6chcnfkdkgrc7fz.southindia-01.azurewebsites.net/api";
 
 const api = axios.create({
   baseURL: API_URL,
