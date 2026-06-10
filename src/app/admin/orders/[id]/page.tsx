@@ -11,6 +11,8 @@ import {
   UserIcon,
   Download,
   Printer,
+  MessageCircle,
+  Mail,
 } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -27,6 +29,8 @@ import {
   sendWhatsAppNotification,
   getStatusUpdateMessage,
 } from "@/lib/whatsappNotify";
+
+const WA_BUSINESS = "918762625888";
 import toast from "react-hot-toast";
 
 export default function AdminOrderDetailPage() {
@@ -53,30 +57,30 @@ export default function AdminOrderDetailPage() {
 
   const handleStatusChange = async (status: string) => {
     try {
-      const res = await api.put(API_ENDPOINTS.ADMIN_ORDER_STATUS(id), {
-        status: status,
-      });
-      toast.success("Order status updated");
-
-      // Send WhatsApp notification
-      const updatedOrder = res.data.data;
-      const cust = typeof updatedOrder.userId === "object" ? updatedOrder.userId : null;
-      if (cust?.phone) {
-        const message = getStatusUpdateMessage({
-          orderId: updatedOrder.orderId,
-          customerName: cust.name,
-          customerPhone: cust.phone,
-          totalAmount: updatedOrder.totalAmount,
-          status: status,
-          items: updatedOrder.items,
-        });
-        sendWhatsAppNotification(cust.phone, message);
-      }
-
+      await api.put(API_ENDPOINTS.ADMIN_ORDER_STATUS(id), { status });
+      toast.success("Order status updated — email sent to customer");
       fetchOrder();
     } catch {
       toast.error("Failed to update status");
     }
+  };
+
+  // Open WhatsApp Web with pre-filled message to customer
+  const handleWhatsApp = () => {
+    if (!order) return;
+    const cust = typeof order.userId === "object" ? (order.userId as User) : null;
+    const phone = cust?.phone || order.address?.phone;
+    if (!phone) { toast.error("Customer phone number not available"); return; }
+    const message = getStatusUpdateMessage({
+      orderId: order.orderId,
+      customerName: cust?.name || order.address?.fullName || "Customer",
+      customerPhone: phone,
+      totalAmount: order.totalAmount,
+      status: order.status,
+      items: order.items,
+    });
+    sendWhatsAppNotification(phone, message);
+    toast.success("WhatsApp opened — send the message to notify customer");
   };
 
   if (loading) return <FullPageSpinner />;
@@ -156,11 +160,19 @@ export default function AdminOrderDetailPage() {
             className="input-premium text-xs h-9 py-0 px-3"
           >
             {Object.entries(ORDER_STATUS_LABELS).map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
+              <option key={key} value={key}>{label}</option>
             ))}
           </select>
+
+          {/* WhatsApp update button */}
+          <button
+            onClick={handleWhatsApp}
+            className="inline-flex items-center justify-center gap-1.5 text-xs font-semibold h-9 px-4 rounded-lg bg-[#25D366] text-white hover:bg-[#1ebe5d] transition-colors"
+            title="Send WhatsApp update to customer"
+          >
+            <MessageCircle className="w-3.5 h-3.5" />
+            WhatsApp Customer
+          </button>
         </div>
       </div>
 

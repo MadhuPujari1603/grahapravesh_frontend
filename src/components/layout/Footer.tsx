@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Mail,
   Phone,
@@ -22,7 +23,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <img src="/images/SAMPAGANGA.jpg" alt="Graha Pravesh" className="h-8 w-8 rounded-lg object-cover brightness-110" />
+              <Image src="/images/SAMPAGANGA.jpg" alt="Graha Pravesh" width={32} height={32} className="rounded-lg object-cover brightness-110" loading="lazy" />
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontFamily: 'var(--font-cormorant), Georgia, serif' }}>
                 <span className="text-white" style={{ fontSize: '15px', fontWeight: 600, letterSpacing: '0.04em', lineHeight: 1, display: 'block' }}>
                   Graha Pravesh

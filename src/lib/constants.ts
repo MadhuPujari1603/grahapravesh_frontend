@@ -53,6 +53,16 @@ export const API_ENDPOINTS = {
   ADMIN_CONTACTS: "/admin/contacts",
   ADMIN_CONTACT_STATUS: (id: string) => `/admin/contacts/${id}/status`,
   ADMIN_CONTACT_DELETE: (id: string) => `/admin/contacts/${id}`,
+  CATEGORY_TOGGLE_FEATURED: (id: string) => `/categories/${id}/featured`,
+  CATEGORIES_FEATURED: "/categories?featured=true",
+
+  // Notifications
+  ADMIN_NOTIFICATIONS: "/admin/notifications",
+  PAYMENT_BY_ORDER: (orderId: string) => `/payments/by-order/${orderId}`,
+
+  // Settings
+  SHIPPING_SETTINGS: "/settings/shipping",
+  ADMIN_SHIPPING_SETTINGS: "/admin/settings/shipping",
 } as const;
 
 export const ORDER_STATUSES = {
@@ -111,6 +121,7 @@ export const ADMIN_NAV_LINKS = [
   { label: "Orders", href: "/admin/orders", icon: "ShoppingBag" },
   { label: "Customers", href: "/admin/customers", icon: "Users" },
   { label: "Messages", href: "/admin/messages", icon: "MessageSquare" },
+  { label: "Settings", href: "/admin/settings", icon: "Settings" },
 ] as const;
 
 export const SORT_OPTIONS = [

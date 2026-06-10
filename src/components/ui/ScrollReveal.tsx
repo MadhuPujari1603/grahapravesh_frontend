@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useRef, useState } from "react";
 
 interface ScrollRevealProps {
   children: React.ReactNode;
@@ -11,33 +10,45 @@ interface ScrollRevealProps {
   className?: string;
 }
 
-const directionOffsets = {
-  up: { y: 40, x: 0 },
-  down: { y: -40, x: 0 },
-  left: { x: 40, y: 0 },
-  right: { x: -40, y: 0 },
-  none: { x: 0, y: 0 },
+const directionStyles: Record<string, string> = {
+  up:    "translate-y-8",
+  down:  "-translate-y-8",
+  left:  "translate-x-8",
+  right: "-translate-x-8",
+  none:  "",
 };
 
 export default function ScrollReveal({
   children,
   direction = "up",
   delay = 0,
-  duration = 0.6,
+  duration = 0.5,
   className,
 }: ScrollRevealProps) {
-  const offset = directionOffsets[direction];
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
+      { rootMargin: "-40px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const offset = directionStyles[direction];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: offset.x, y: offset.y }}
-      whileInView={{ opacity: 1, x: 0, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration, delay, ease: "easeOut" }}
-      className={className}
+    <div
+      ref={ref}
+      className={`transition-all ${visible ? "opacity-100 translate-x-0 translate-y-0" : `opacity-0 ${offset}`} ${className ?? ""}`}
+      style={{ transitionDuration: `${duration * 1000}ms`, transitionDelay: `${delay * 1000}ms`, transitionTimingFunction: "cubic-bezier(0.4,0,0.2,1)" }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -47,27 +58,29 @@ interface StaggerContainerProps {
   staggerDelay?: number;
 }
 
-export function StaggerContainer({
-  children,
-  className,
-  staggerDelay = 0.1,
-}: StaggerContainerProps) {
+export function StaggerContainer({ children, className, staggerDelay = 0.1 }: StaggerContainerProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
+      { rootMargin: "-40px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-50px" }}
-      variants={{
-        visible: {
-          transition: {
-            staggerChildren: staggerDelay,
-          },
-        },
-      }}
-      className={className}
-    >
-      {children}
-    </motion.div>
+    <div ref={ref} className={className} data-visible={visible} data-stagger={staggerDelay}>
+      {React.Children.map(children, (child, i) =>
+        React.isValidElement(child)
+          ? React.cloneElement(child as React.ReactElement<any>, { "data-stagger-index": i, "data-visible": visible, "data-stagger-delay": staggerDelay })
+          : child
+      )}
+    </div>
   );
 }
 
@@ -75,29 +88,23 @@ interface StaggerItemProps {
   children: React.ReactNode;
   className?: string;
   direction?: "up" | "left" | "right";
+  "data-stagger-index"?: number;
+  "data-visible"?: boolean;
+  "data-stagger-delay"?: number;
 }
 
-export function StaggerItem({
-  children,
-  className,
-  direction = "up",
-}: StaggerItemProps) {
-  const offset = directionOffsets[direction];
+export function StaggerItem({ children, className, direction = "up", ...props }: StaggerItemProps) {
+  const visible = props["data-visible"] ?? false;
+  const index = props["data-stagger-index"] ?? 0;
+  const staggerDelay = props["data-stagger-delay"] ?? 0.1;
+  const offset = directionStyles[direction];
 
   return (
-    <motion.div
-      variants={{
-        hidden: { opacity: 0, x: offset.x, y: offset.y },
-        visible: {
-          opacity: 1,
-          x: 0,
-          y: 0,
-          transition: { duration: 0.5, ease: "easeOut" },
-        },
-      }}
-      className={className}
+    <div
+      className={`transition-all ${visible ? "opacity-100 translate-x-0 translate-y-0" : `opacity-0 ${offset}`} ${className ?? ""}`}
+      style={{ transitionDuration: "500ms", transitionDelay: `${index * staggerDelay * 1000}ms`, transitionTimingFunction: "cubic-bezier(0.4,0,0.2,1)" }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

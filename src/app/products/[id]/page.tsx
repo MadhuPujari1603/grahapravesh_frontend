@@ -238,6 +238,15 @@ export default function ProductDetailPage() {
   const validateCustomization = (): boolean => {
     if (!product?.isCustomizable || !product.customizationFields?.length)
       return true;
+
+    // If the customer hasn't filled in any field at all, they are ordering
+    // the product as-is (no personalisation) — that is perfectly valid.
+    const hasStartedPersonalizing = product.customizationFields.some(
+      (field) => customization[field.fieldName]?.trim()
+    );
+    if (!hasStartedPersonalizing) return true;
+
+    // They've started personalising — now enforce required fields.
     const errors: Record<string, string> = {};
     for (const field of product.customizationFields) {
       if (
@@ -255,10 +264,18 @@ export default function ProductDetailPage() {
   const handleAddToCart = () => {
     if (!product) return;
     if (!validateCustomization()) return;
+
+    // Only pass customization data if the customer actually filled something in
+    const hasCustomization =
+      product.isCustomizable &&
+      product.customizationFields?.some(
+        (field) => customization[field.fieldName]?.trim()
+      );
+
     addToCart(
       product,
       quantity,
-      product.isCustomizable ? customization : undefined
+      hasCustomization ? customization : undefined
     );
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
@@ -525,34 +542,39 @@ export default function ProductDetailPage() {
                   PERSONALISE PANEL (dark green box)
               ──────────────────────────────────────── */}
               {product.isCustomizable && product.customizationFields && product.customizationFields.length > 0 ? (
-                <div className="bg-brand-emerald rounded-xl overflow-hidden">
+                <div
+                  className="rounded-xl overflow-hidden"
+                  style={{ background: "linear-gradient(135deg,#0a3d2e 0%,#0e5540 100%)", boxShadow: "0 4px 24px rgba(10,61,46,0.18)" }}
+                >
                   {/* Panel header */}
-                  <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-                    <span className="text-xs font-black text-brand-gold uppercase tracking-[0.25em]">
-                      Personalise
-                    </span>
-                    <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">
-                      Step 01 / 0{product.customizationFields.length}
+                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10">
+                    <div>
+                      <span className="text-[11px] font-black text-brand-gold uppercase tracking-[0.22em]">
+                        Personalise
+                      </span>
+                      <p className="text-[9px] text-white/35 mt-0 normal-case tracking-normal font-normal leading-tight">
+                        Optional — leave blank to order as-is
+                      </p>
+                    </div>
+                    <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
+                      {product.customizationFields.length} field{product.customizationFields.length > 1 ? "s" : ""}
                     </span>
                   </div>
 
-                  <div className="px-5 py-4 space-y-4">
-                    {/* Fields */}
+                  <div className="px-4 py-3 space-y-3">
+                    {/* Fields — compact */}
                     {product.customizationFields.map((field) => {
                       const val = customization[field.fieldName] || "";
                       const hasError = !!customizationErrors[field.fieldName];
                       const maxLen = field.maxLength || 30;
                       return (
                         <div key={field.fieldName}>
-                          <div className="flex items-center justify-between mb-1.5">
-                            <label className="text-[10px] font-black text-white/60 uppercase tracking-[0.2em]">
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-[9px] font-black text-white/50 uppercase tracking-[0.18em]">
                               {field.label}
-                              {field.required && (
-                                <span className="text-brand-gold ml-1">*</span>
-                              )}
                             </label>
-                            <span className={`text-[10px] font-bold tabular-nums ${
-                              val.length >= maxLen ? "text-red-400" : "text-white/30"
+                            <span className={`text-[9px] font-bold tabular-nums ${
+                              val.length >= maxLen ? "text-red-400" : "text-white/25"
                             }`}>
                               {val.length}/{maxLen}
                             </span>
@@ -564,84 +586,67 @@ export default function ProductDetailPage() {
                               const v = e.target.value;
                               setCustomization((prev) => ({ ...prev, [field.fieldName]: v }));
                               if (customizationErrors[field.fieldName]) {
-                                setCustomizationErrors((prev) => {
-                                  const next = { ...prev };
-                                  delete next[field.fieldName];
-                                  return next;
-                                });
+                                setCustomizationErrors((prev) => { const next = { ...prev }; delete next[field.fieldName]; return next; });
                               }
                             }}
                             placeholder={field.placeholder || field.label}
                             maxLength={maxLen}
-                            className={`w-full bg-transparent border-b-2 py-2.5 text-sm font-semibold text-white placeholder:text-white/25 outline-none transition-colors ${
-                              hasError
-                                ? "border-red-400 focus:border-red-300"
-                                : val
-                                ? "border-brand-gold focus:border-brand-gold"
-                                : "border-white/20 focus:border-white/50"
+                            className={`w-full bg-transparent border-b py-1.5 text-sm font-medium text-white placeholder:text-white/20 outline-none transition-colors ${
+                              hasError ? "border-red-400" : val ? "border-brand-gold" : "border-white/15 focus:border-white/40"
                             }`}
                           />
                           {hasError && (
-                            <p className="mt-1.5 text-[11px] text-red-400 font-semibold flex items-center gap-1">
-                              <X className="w-3 h-3" />
-                              {customizationErrors[field.fieldName]}
+                            <p className="mt-1 text-[10px] text-red-400 font-semibold flex items-center gap-1">
+                              <X className="w-2.5 h-2.5" />{customizationErrors[field.fieldName]}
                             </p>
                           )}
                         </div>
                       );
                     })}
 
-
-
                     {/* Progress pills */}
                     {product.customizationFields.length > 1 && (
-                      <div className="flex gap-1.5">
+                      <div className="flex gap-1">
                         {product.customizationFields.map((f) => (
-                          <div
-                            key={f.fieldName}
-                            className={`h-0.5 flex-1 transition-all duration-300 ${
-                              customization[f.fieldName]?.trim()
-                                ? "bg-brand-gold"
-                                : "bg-white/15"
-                            }`}
-                          />
+                          <div key={f.fieldName} className={`h-[2px] flex-1 rounded-full transition-all duration-300 ${customization[f.fieldName]?.trim() ? "bg-brand-gold" : "bg-white/10"}`} />
                         ))}
                       </div>
                     )}
 
-                    {/* CTAs inside the panel */}
-                    <div className="space-y-2 pt-1">
+                    {/* CTAs — compact */}
+                    <div className="flex gap-2 pt-0.5">
                       <button
                         onClick={handleAddToCart}
-                        className={`w-full py-4 text-sm font-black uppercase tracking-widest transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2.5 ${
-                          addedToCart
-                            ? "bg-brand-gold/80 text-brand-emerald"
-                            : "bg-brand-gold text-brand-emerald hover:bg-brand-gold-light"
+                        className={`flex-1 py-2.5 text-xs font-black uppercase tracking-wider transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-1.5 rounded-lg ${
+                          addedToCart ? "bg-brand-gold/80 text-brand-emerald" : "bg-brand-gold text-brand-emerald hover:bg-brand-gold-light"
                         }`}
                       >
-                        <ShoppingCart className="w-4 h-4" />
-                        {addedToCart ? "Added to Collection ✓" : "Add to Collection"}
+                        <ShoppingCart className="w-3.5 h-3.5" />
+                        {addedToCart ? "Added ✓" : "Add to Cart"}
                       </button>
                       <button
                         onClick={() => {
                           if (!validateCustomization()) return;
-                          addToCart(product, quantity, product.isCustomizable ? customization : undefined);
+                          const hasCustomization = product.isCustomizable && product.customizationFields?.some((field) => customization[field.fieldName]?.trim());
+                          addToCart(product, quantity, hasCustomization ? customization : undefined);
                           router.push("/checkout");
                         }}
-                        className="w-full py-4 text-sm font-black uppercase tracking-widest border-2 border-white/30 text-white hover:border-white hover:bg-white/5 transition-all duration-200 active:scale-[0.98]"
+                        className="flex-1 py-2.5 text-xs font-black uppercase tracking-wider border border-white/25 text-white hover:border-white/60 hover:bg-white/5 transition-all duration-200 active:scale-[0.98] rounded-lg"
                       >
-                        Instant Purchase
-                      </button>
-                      <button
-                        onClick={() => setIsWishlisted(!isWishlisted)}
-                        className={`w-full py-2.5 text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
-                          isWishlisted ? "text-red-400" : "text-white/40 hover:text-white/70"
-                        }`}
-                      >
-                        <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "fill-current" : ""}`} />
-                        {isWishlisted ? "Saved to Wishlist" : "Add to Wishlist"}
+                        Buy Now
                       </button>
                     </div>
+
+                    {/* Wishlist — minimal */}
+                    <button
+                      onClick={() => setIsWishlisted(!isWishlisted)}
+                      className={`w-full py-1.5 text-[10px] font-semibold uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 ${
+                        isWishlisted ? "text-red-400" : "text-white/30 hover:text-white/50"
+                      }`}
+                    >
+                      <Heart className={`w-3 h-3 ${isWishlisted ? "fill-current" : ""}`} />
+                      {isWishlisted ? "Saved" : "Save to Wishlist"}
+                    </button>
                   </div>
                 </div>
               ) : (

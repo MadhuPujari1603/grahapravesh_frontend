@@ -19,6 +19,7 @@ import api from "@/lib/axios";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { Address } from "@/types";
 import toast from "react-hot-toast";
+import { usePincodeAutofill } from "@/hooks/usePincodeAutofill";
 
 const addressSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
@@ -49,9 +50,29 @@ export default function CheckoutPage() {
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<AddressFormData>({
     resolver: zodResolver(addressSchema),
   });
+
+  const { fetchPincode, isLoading: pincodeLoading } = usePincodeAutofill();
+  const [pincodeDistrict, setPincodeDistrict] = useState("");
+
+  const handlePincodeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const pin = e.target.value.replace(/\D/g, "").slice(0, 6);
+    setValue("pincode", pin);
+    if (pin.length === 6) {
+      const data = await fetchPincode(pin);
+      if (data) {
+        setValue("city", data.city, { shouldValidate: true });
+        setValue("state", data.state, { shouldValidate: true });
+        setPincodeDistrict(data.district);
+        toast.success(`${data.city}, ${data.district}, ${data.state}`, { icon: "📍", duration: 3000 });
+      }
+    } else {
+      setPincodeDistrict("");
+    }
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -85,8 +106,25 @@ export default function CheckoutPage() {
     }
   }, [isAuthenticated]);
 
+  const [mounted, setMounted] = useState(false);
+  const [deliveryCharge, setDeliveryCharge] = useState(0);
+  const [freeThreshold, setFreeThreshold] = useState(999);
+  const [freeShippingEnabled, setFreeShippingEnabled] = useState(true);
+
+  useEffect(() => {
+    setMounted(true);
+    api.get(API_ENDPOINTS.SHIPPING_SETTINGS).then((res) => {
+      const d = res.data.data;
+      setDeliveryCharge(d.deliveryCharge ?? 99);
+      setFreeThreshold(d.freeShippingThreshold ?? 999);
+      setFreeShippingEnabled(d.isFreeShippingEnabled ?? true);
+    }).catch(() => {
+      setDeliveryCharge(99);
+    });
+  }, []);
+
   const total = cartTotal();
-  const shipping = total >= 999 ? 0 : 99;
+  const shipping = mounted ? (freeShippingEnabled && total >= freeThreshold ? 0 : deliveryCharge) : 0;
   const grandTotal = total + shipping;
 
   const handleAddressSubmit = async (data: AddressFormData) => {
@@ -472,26 +510,43 @@ export default function CheckoutPage() {
                       placeholder="Apartment, Floor"
                       {...register("addressLine2")}
                     />
-                    <div className="grid grid-cols-1 xs:grid-cols-3 gap-4">
-                      <Input
-                        label="City"
-                        placeholder="Mumbai"
-                        error={errors.city?.message}
-                        {...register("city")}
-                      />
-                      <Input
-                        label="State"
-                        placeholder="Maharashtra"
-                        error={errors.state?.message}
-                        {...register("state")}
-                      />
-                      <Input
-                        label="Pincode"
-                        placeholder="400001"
-                        error={errors.pincode?.message}
-                        {...register("pincode")}
-                      />
-                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div className="relative">
+                          <Input
+                            label="Pincode"
+                            placeholder="560001"
+                            maxLength={6}
+                            error={errors.pincode?.message}
+                            {...register("pincode")}
+                            onChange={handlePincodeChange}
+                          />
+                          {pincodeLoading && (
+                            <div className="absolute right-3 top-9 w-4 h-4 border-2 border-brand-emerald border-t-transparent rounded-full animate-spin" />
+                          )}
+                        </div>
+                        <Input
+                          label="City / Town"
+                          placeholder="Auto-filled"
+                          error={errors.city?.message}
+                          {...register("city")}
+                        />
+                        <div>
+                          <label className="block text-xs font-medium text-brand-charcoal-medium mb-1">District</label>
+                          <input
+                            type="text"
+                            readOnly
+                            value={pincodeDistrict}
+                            placeholder="Auto-filled"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-brand-charcoal-medium cursor-default focus:outline-none"
+                          />
+                        </div>
+                        <Input
+                          label="State"
+                          placeholder="Auto-filled"
+                          error={errors.state?.message}
+                          {...register("state")}
+                        />
+                      </div>
                     <div className="flex gap-3">
                       <Button type="submit" size="md">
                         Save Address
@@ -617,7 +672,7 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-brand-charcoal-medium">Shipping</span>
-                    <span className="text-green-600 font-medium">
+                    <span className={shipping === 0 ? "text-green-600 font-medium" : "font-medium text-brand-charcoal"}>
                       {shipping === 0 ? "Free" : formatPrice(shipping)}
                     </span>
                   </div>

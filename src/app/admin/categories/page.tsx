@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, Grid3X3 } from "lucide-react";
+import { Plus, Pencil, Trash2, Grid3X3, Star } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import { FullPageSpinner } from "@/components/ui/Spinner";
@@ -32,6 +32,16 @@ export default function AdminCategoriesPage() {
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  const handleToggleFeatured = async (id: string) => {
+    try {
+      await api.patch(API_ENDPOINTS.CATEGORY_TOGGLE_FEATURED(id));
+      toast.success("Category updated");
+      fetchCategories();
+    } catch {
+      toast.error("Failed to update category");
+    }
+  };
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -94,11 +104,29 @@ export default function AdminCategoriesPage() {
                   )}
                 </div>
               </div>
-              <div className="p-4 flex items-center justify-between">
-                <p className="text-sm text-brand-charcoal-medium line-clamp-1">
-                  {category.description || "No description"}
-                </p>
+                <div className="p-4 flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-brand-charcoal-medium line-clamp-1">
+                    {category.description || "No description"}
+                  </p>
+                  {category.isFeatured && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full mt-1">
+                      <Star className="w-2.5 h-2.5 fill-amber-500" /> Featured
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center gap-1 shrink-0 ml-4">
+                  <button
+                    onClick={() => handleToggleFeatured(category._id)}
+                    className={`p-2 rounded-lg transition-colors ${
+                      category.isFeatured
+                        ? "text-amber-500 bg-amber-50 hover:bg-amber-100"
+                        : "text-brand-charcoal-light hover:text-amber-500 hover:bg-amber-50"
+                    }`}
+                    title={category.isFeatured ? "Remove from featured" : "Mark as featured"}
+                  >
+                    <Star className={`w-4 h-4 ${category.isFeatured ? "fill-amber-500" : ""}`} />
+                  </button>
                   <Link href={`/admin/categories/new?edit=${category._id}`}>
                     <button className="p-2 rounded-lg text-brand-charcoal-light hover:text-brand-emerald hover:bg-green-50 transition-colors">
                       <Pencil className="w-4 h-4" />

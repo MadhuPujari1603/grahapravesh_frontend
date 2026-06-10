@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Category } from "@/types";
 
@@ -19,10 +20,13 @@ export default function CategoryCard({ category }: CategoryCardProps) {
       style={{ background: "rgba(255,255,255,0.65)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderColor: "rgba(255,255,255,0.50)", boxShadow: "0 2px 16px 0 rgba(10,61,46,0.07), 0 1px 0 0 rgba(255,255,255,0.8) inset" }}
     >
       <div className="relative h-44 overflow-hidden bg-gradient-to-br from-gray-900 to-brand-charcoal">
-        <img
+        <Image
           src={imageUrl}
           alt={category.name}
-          className="w-full h-full object-cover group-hover:scale-110 group-hover:rotate-1 transition-all duration-700 ease-out"
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover group-hover:scale-110 group-hover:rotate-1 transition-all duration-700 ease-out"
+          loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-brand-emerald-deeper/90 via-brand-emerald-dark/70 to-brand-charcoal/60 group-hover:from-brand-emerald-deeper/80 group-hover:via-brand-emerald-dark/60 group-hover:to-transparent transition-all duration-500" />
         

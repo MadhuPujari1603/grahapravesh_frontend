@@ -29,6 +29,7 @@ export interface Category {
   imageUrl?: string;
   productCount?: number;
   isActive: boolean;
+  isFeatured?: boolean;
   createdAt: string;
   updatedAt: string;
 }

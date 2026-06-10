@@ -23,6 +23,7 @@ import api from "@/lib/axios";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { Product, Category } from "@/types";
 import toast from "react-hot-toast";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import ScrollReveal, {
   StaggerContainer,
@@ -95,8 +96,12 @@ export default function HomePage() {
         ]);
         if (productsRes.status === "fulfilled")
           setFeaturedProducts(productsRes.value.data.data || []);
-        if (categoriesRes.status === "fulfilled")
-          setCategories(categoriesRes.value.data.data || []);
+        if (categoriesRes.status === "fulfilled") {
+          const all: Category[] = categoriesRes.value.data.data || [];
+          // show featured first, then rest; fallback to all if none featured
+          const featured = all.filter((c) => c.isFeatured);
+          setCategories(featured.length > 0 ? featured : all);
+        }
       } catch {
         /* silent */
       } finally {
@@ -370,10 +375,10 @@ export default function HomePage() {
             SHOP BY CATEGORY
         ═══════════════════════════════════════════ */}
         <section className="py-10 lg:py-14 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
 
             {/* section header */}
-            <ScrollReveal className="mb-8 text-center">
+            <ScrollReveal className="mb-8 text-center px-4 sm:px-6 lg:px-8">
               <p className="text-[10px] font-bold text-brand-gold-dark uppercase tracking-[0.28em] mb-3">
                 Our Collections
               </p>
@@ -381,8 +386,7 @@ export default function HomePage() {
                 Shop by Category
               </h2>
               <p className="text-sm text-brand-charcoal-light max-w-sm mx-auto leading-relaxed">
-                Discover curated ranges crafted for every room and every mood in
-                your home.
+                Discover curated ranges crafted for every room and every mood in your home.
               </p>
             </ScrollReveal>
 
@@ -392,25 +396,69 @@ export default function HomePage() {
               </div>
             ) : categories.length > 0 ? (
               <>
-                <StaggerContainer
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                  staggerDelay={0.08}
-                >
-                  {categories.slice(0, 8).map((category) => (
-                    <StaggerItem key={category._id}>
-                      <CategoryCard category={category} />
-                    </StaggerItem>
-                  ))}
-                </StaggerContainer>
+                {/* ── Mobile: horizontal round-bubble scroll ── */}
+                <div className="sm:hidden px-4">
+                  <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+                    {categories.map((category) => {
+                      const imgUrl = category.imageUrl || "/images/placeholder-category.svg";
+                      return (
+                        <Link
+                          key={category._id}
+                          href={`/products?category=${category._id}`}
+                          className="flex flex-col items-center gap-2 shrink-0 snap-start"
+                        >
+                          <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-brand-emerald/20 shadow-md bg-gradient-to-br from-gray-100 to-gray-200 active:scale-95 transition-transform">
+                            <Image
+                              src={imgUrl}
+                              alt={category.name}
+                              fill
+                              sizes="80px"
+                              className="object-cover"
+                              loading="lazy"
+                            />
+                            <div className="absolute inset-0 rounded-full bg-brand-emerald/10" />
+                          </div>
+                          <span className="text-[11px] font-semibold text-brand-charcoal text-center leading-tight max-w-[72px] line-clamp-2">
+                            {category.name}
+                          </span>
+                        </Link>
+                      );
+                    })}
+                    {/* View all bubble */}
+                    <Link
+                      href="/products"
+                      className="flex flex-col items-center gap-2 shrink-0 snap-start"
+                    >
+                      <div className="w-20 h-20 rounded-full border-2 border-dashed border-brand-emerald/30 flex items-center justify-center bg-brand-emerald/5 active:scale-95 transition-transform">
+                        <ArrowRight className="w-5 h-5 text-brand-emerald" />
+                      </div>
+                      <span className="text-[11px] font-semibold text-brand-emerald text-center">View All</span>
+                    </Link>
+                  </div>
+                </div>
 
-                <div className="text-center mt-12">
-                  <Link
-                    href="/products"
-                    className="inline-flex items-center gap-2 text-xs font-semibold text-brand-emerald uppercase tracking-[0.18em] border-b border-brand-emerald/30 hover:border-brand-emerald pb-0.5 transition-all duration-300 group"
+                {/* ── Desktop: grid ── */}
+                <div className="hidden sm:block px-6 lg:px-8">
+                  <StaggerContainer
+                    className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                    staggerDelay={0.08}
                   >
-                    View All Categories
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-300" />
-                  </Link>
+                    {categories.slice(0, 8).map((category) => (
+                      <StaggerItem key={category._id}>
+                        <CategoryCard category={category} />
+                      </StaggerItem>
+                    ))}
+                  </StaggerContainer>
+
+                  <div className="text-center mt-12">
+                    <Link
+                      href="/products"
+                      className="inline-flex items-center gap-2 text-xs font-semibold text-brand-emerald uppercase tracking-[0.18em] border-b border-brand-emerald/30 hover:border-brand-emerald pb-0.5 transition-all duration-300 group"
+                    >
+                      View All Categories
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-300" />
+                    </Link>
+                  </div>
                 </div>
               </>
             ) : (
@@ -458,7 +506,7 @@ export default function HomePage() {
             ) : featuredProducts.length > 0 ? (
               <>
                 <StaggerContainer
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7"
+                  className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-7"
                   staggerDelay={0.08}
                 >
                   {featuredProducts.slice(0, 4).map((product) => (

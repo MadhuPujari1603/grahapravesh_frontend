@@ -11,6 +11,7 @@ import {
   Users,
   CreditCard,
   MessageSquare,
+  Settings,
   X,
   Lock,
   Unlock,
@@ -33,6 +34,7 @@ const navItems = [
   { label: "Categories", href: "/admin/categories", icon: Grid3X3 },
   { label: "Customers",  href: "/admin/customers",  icon: Users },
   { label: "Messages",   href: "/admin/messages",   icon: MessageSquare },
+  { label: "Settings",   href: "/admin/settings",   icon: Settings },
 ];
 
 export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: SidebarProps) {

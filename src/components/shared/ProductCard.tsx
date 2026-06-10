@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ShoppingCart, Heart, Eye } from "lucide-react";
 import { Product, Category } from "@/types";
 import { formatPrice, getDiscountPercentage } from "@/lib/utils";
@@ -36,12 +37,14 @@ export default function ProductCard({ product }: ProductCardProps) {
       
       {/* Image Section */}
       <Link href={`/products/${product._id}`} className="block relative">
-        <div className="relative h-72 overflow-hidden bg-gradient-to-br from-gray-50 to-white">
-          <img
+        <div className="relative h-44 sm:h-72 overflow-hidden bg-gradient-to-br from-gray-50 to-white">
+          <Image
             src={imageUrl}
             alt={product.name}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className="object-contain group-hover:scale-110 transition-transform duration-700 ease-out"
             loading="lazy"
-            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 ease-out"
           />
 
           {/* Overlay on hover */}
@@ -111,7 +114,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       </Link>
 
       {/* Info Section */}
-      <div className="flex flex-col flex-1 p-5 relative z-10">
+      <div className="flex flex-col flex-1 p-3 sm:p-5 relative z-10">
         {categoryName && (
           <span className="text-[11px] font-semibold text-brand-gold-dark uppercase tracking-[0.15em] mb-2 group-hover:text-brand-gold transition-colors duration-300">
             {categoryName}

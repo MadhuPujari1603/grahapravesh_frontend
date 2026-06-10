@@ -11,17 +11,36 @@ import EmptyState from "@/components/ui/EmptyState";
 import useCart from "@/hooks/useCart";
 import useAuth from "@/hooks/useAuth";
 import { formatPrice } from "@/lib/utils";
+import api from "@/lib/axios";
+import { API_ENDPOINTS } from "@/lib/constants";
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, clearCart, getCart, cartTotal } =
     useCart();
   const { isAuthenticated } = useAuth();
+  const [mounted, setMounted] = React.useState(false);
+  const [deliveryCharge, setDeliveryCharge] = React.useState(0);
+  const [freeThreshold, setFreeThreshold] = React.useState(999);
+  const [freeShippingEnabled, setFreeShippingEnabled] = React.useState(true);
 
   useEffect(() => {
     if (isAuthenticated) getCart();
   }, [isAuthenticated, getCart]);
 
+  useEffect(() => {
+    setMounted(true);
+    api.get(API_ENDPOINTS.SHIPPING_SETTINGS).then((res) => {
+      const d = res.data.data;
+      setDeliveryCharge(d.deliveryCharge ?? 99);
+      setFreeThreshold(d.freeShippingThreshold ?? 999);
+      setFreeShippingEnabled(d.isFreeShippingEnabled ?? true);
+    }).catch(() => {
+      setDeliveryCharge(99);
+    });
+  }, []);
+
   const total = cartTotal();
+  const shipping = mounted ? (freeShippingEnabled && total >= freeThreshold ? 0 : deliveryCharge) : 0;
 
   if (items.length === 0) {
     return (
@@ -156,16 +175,21 @@ export default function CartPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-brand-charcoal-medium">Shipping</span>
-                    <span className="text-green-600 font-medium">
-                      {total >= 999 ? "Free" : formatPrice(99)}
+                    <span className={shipping === 0 ? "text-green-600 font-medium" : "font-medium text-brand-charcoal"}>
+                      {shipping === 0 ? "Free" : formatPrice(shipping)}
                     </span>
                   </div>
+                  {freeShippingEnabled && total < freeThreshold && (
+                    <p className="text-xs text-brand-charcoal-light">
+                      Add {formatPrice(freeThreshold - total)} more for free shipping
+                    </p>
+                  )}
                   <div className="border-t border-gray-100 pt-3 flex justify-between">
                     <span className="font-semibold text-brand-charcoal">
                       Total
                     </span>
                     <span className="font-bold text-xl text-brand-emerald">
-                      {formatPrice(total >= 999 ? total : total + 99)}
+                      {formatPrice(total + shipping)}
                     </span>
                   </div>
                 </div>

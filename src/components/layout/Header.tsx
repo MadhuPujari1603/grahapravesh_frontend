@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   ShoppingCart,
@@ -77,7 +78,7 @@ export default function Header() {
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 shrink-0">
-            <img src="/images/SAMPAGANGA.jpg" alt="Graha Pravesh" className="h-8 w-8 rounded-lg object-cover" />
+            <Image src="/images/SAMPAGANGA.jpg" alt="Graha Pravesh" width={32} height={32} className="rounded-lg object-cover" priority />
             <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontFamily: 'var(--font-cormorant), Georgia, serif' }}>
               <span
                 className="text-brand-emerald-dark"

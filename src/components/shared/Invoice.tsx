@@ -9,12 +9,14 @@ const Invoice = forwardRef<HTMLDivElement, InvoiceProps>(({ order }, ref) => {
   const customer =
     typeof order.userId === "object" ? order.userId : null;
 
-  const subtotal = order.items.reduce(
-    (sum: number, item: any) => sum + item.price * item.quantity,
-    0
-  );
-  const shipping = order.totalAmount >= 999 ? 0 : 99;
-  const grandTotal = order.totalAmount;
+  // Use values stored on the order at creation time.
+  // Fall back to recalculating for older orders that predate the deliveryCharge field.
+  const subtotal: number =
+    order.itemsSubtotal ??
+    order.items.reduce((sum: number, item: any) => sum + item.price * item.quantity, 0);
+  const shipping: number =
+    order.deliveryCharge ?? (order.totalAmount - subtotal);
+  const grandTotal: number = order.totalAmount;
 
   return (
     <div
@@ -126,7 +128,7 @@ const Invoice = forwardRef<HTMLDivElement, InvoiceProps>(({ order }, ref) => {
             Payment Method
           </p>
           <p style={{ fontSize: "14px", fontWeight: "600", color: "#1c1917", margin: "2px 0 0 0", textTransform: "capitalize" }}>
-            {order.paymentMethod === "cod" ? "Cash on Delivery" : order.paymentMethod}
+            {order.paymentMethod === "cod" ? "Cash on Delivery" : "Online Payment (Razorpay)"}
           </p>
         </div>
         <div>

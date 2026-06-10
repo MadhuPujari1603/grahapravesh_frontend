@@ -33,6 +33,7 @@ import { formatPrice, formatDate } from "@/lib/utils";
 import { OrderStatusBadge } from "@/components/ui/Badge";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { usePincodeAutofill } from "@/hooks/usePincodeAutofill";
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -78,9 +79,29 @@ export default function ProfilePage() {
     handleSubmit: handleAddressSubmit,
     formState: { errors: addressErrors },
     reset: resetAddress,
+    setValue: setAddressValue,
   } = useForm<AddressFormData>({
     resolver: zodResolver(addressSchema),
   });
+
+  const { fetchPincode, isLoading: pincodeLoading } = usePincodeAutofill();
+  const [pincodeDistrict, setPincodeDistrict] = useState("");
+
+  const handlePincodeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const pin = e.target.value.replace(/\D/g, "").slice(0, 6);
+    setAddressValue("pincode", pin);
+    if (pin.length === 6) {
+      const data = await fetchPincode(pin);
+      if (data) {
+        setAddressValue("city", data.city, { shouldValidate: true });
+        setAddressValue("state", data.state, { shouldValidate: true });
+        setPincodeDistrict(data.district);
+        toast.success(`${data.city}, ${data.district}, ${data.state}`, { icon: "📍", duration: 3000 });
+      }
+    } else {
+      setPincodeDistrict("");
+    }
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -383,24 +404,41 @@ export default function ProfilePage() {
                         placeholder="Apartment, Floor"
                         {...registerAddress("addressLine2")}
                       />
-                      <div className="grid grid-cols-1 min-[480px]:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="relative">
+                          <Input
+                            label="Pincode"
+                            placeholder="560001"
+                            maxLength={6}
+                            error={addressErrors.pincode?.message}
+                            {...registerAddress("pincode")}
+                            onChange={handlePincodeChange}
+                          />
+                          {pincodeLoading && (
+                            <div className="absolute right-3 top-9 w-4 h-4 border-2 border-brand-emerald border-t-transparent rounded-full animate-spin" />
+                          )}
+                        </div>
                         <Input
-                          label="City"
-                          placeholder="City"
+                          label="City / Town"
+                          placeholder="Auto-filled"
                           error={addressErrors.city?.message}
                           {...registerAddress("city")}
                         />
+                        <div>
+                          <label className="block text-xs font-medium text-brand-charcoal-medium mb-1">District</label>
+                          <input
+                            type="text"
+                            readOnly
+                            value={pincodeDistrict}
+                            placeholder="Auto-filled"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-brand-charcoal-medium cursor-default focus:outline-none"
+                          />
+                        </div>
                         <Input
                           label="State"
-                          placeholder="State"
+                          placeholder="Auto-filled"
                           error={addressErrors.state?.message}
                           {...registerAddress("state")}
-                        />
-                        <Input
-                          label="Pincode"
-                          placeholder="Pincode"
-                          error={addressErrors.pincode?.message}
-                          {...registerAddress("pincode")}
                         />
                       </div>
                       <div className="flex gap-3 pt-1">

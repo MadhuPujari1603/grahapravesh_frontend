@@ -1,6 +1,5 @@
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
-
+// Dynamic imports — html2canvas (~500KB) + jsPDF (~400KB) only load when
+// the customer actually clicks "Download Invoice", never on page load.
 export async function downloadInvoice(
   element: HTMLElement,
   orderId: string
@@ -16,6 +15,11 @@ export async function downloadInvoice(
   }
 
   try {
+    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+      import("html2canvas"),
+      import("jspdf"),
+    ]);
+
     const canvas = await html2canvas(element, {
       scale: 2,
       useCORS: true,
@@ -28,7 +32,7 @@ export async function downloadInvoice(
     const pageHeight = 297; // A4 height in mm
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    const pdf = new jsPDF("p", "mm", "a4");
+    const pdf = new (jsPDF as any)("p", "mm", "a4");
     let heightLeft = imgHeight;
     let position = 0;
 

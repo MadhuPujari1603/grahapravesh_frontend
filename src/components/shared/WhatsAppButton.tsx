@@ -59,8 +59,7 @@ export default function WhatsAppButton() {
           />
         </svg>
 
-        {/* Pulse ring */}
-        <span className="absolute w-14 h-14 rounded-full bg-[#25D366] animate-ping opacity-20" />
+        {/* Pulse ring — removed animate-ping (drains mobile GPU/battery) */}
       </a>
     </div>
   );
