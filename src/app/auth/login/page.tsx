@@ -142,7 +142,7 @@ export default function LoginPage() {
       </div>
 
       {/* ── RIGHT PANEL: Form ── */}
-      <div className="w-[40%] flex flex-col items-center justify-center bg-brand-cream-light px-6 sm:px-10 py-12">
+      <div className="w-full lg:w-[40%] flex flex-col items-center justify-center bg-brand-cream-light px-6 sm:px-10 py-12">
         <div className="w-full max-w-[400px]">
 
           {/* Mobile logo */}
