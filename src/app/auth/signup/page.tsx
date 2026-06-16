@@ -14,8 +14,9 @@ const signupSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   phone: z
     .string()
-    .min(10, "Phone number must be at least 10 digits")
-    .regex(/^[0-9+\-\s]+$/, "Please enter a valid phone number"),
+    .min(6, "Phone number is too short")
+    .max(15, "Phone number is too long")
+    .regex(/^\d+$/, "Only digits allowed — no spaces, dashes or letters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
@@ -28,10 +29,34 @@ const PERKS = [
   { icon: "🔒", label: "Secure checkout, always" },
 ];
 
+const COUNTRY_CODES = [
+  { code: "+91",  iso: "in", name: "India" },
+  { code: "+1",   iso: "us", name: "USA" },
+  { code: "+44",  iso: "gb", name: "UK" },
+  { code: "+61",  iso: "au", name: "Australia" },
+  { code: "+971", iso: "ae", name: "UAE" },
+  { code: "+65",  iso: "sg", name: "Singapore" },
+  { code: "+60",  iso: "my", name: "Malaysia" },
+  { code: "+49",  iso: "de", name: "Germany" },
+  { code: "+33",  iso: "fr", name: "France" },
+  { code: "+81",  iso: "jp", name: "Japan" },
+];
+
 export default function SignupPage() {
   const router = useRouter();
   const { signup, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [countryCode, setCountryCode] = useState("+91");
+  const [showCountryDrop, setShowCountryDrop] = useState(false);
+  const selectedCountry = COUNTRY_CODES.find((c) => c.code === countryCode) ?? COUNTRY_CODES[0];
+  const dropRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropRef.current && !dropRef.current.contains(e.target as Node)) setShowCountryDrop(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const {
     register,
@@ -42,7 +67,8 @@ export default function SignupPage() {
   });
 
   const onSubmit = async (data: SignupFormData) => {
-    const success = await signup(data);
+    // Prepend country code before submitting
+    const success = await signup({ ...data, phone: `${countryCode}${data.phone}` });
     if (success) {
       router.push("/");
     }
@@ -232,20 +258,67 @@ export default function SignupPage() {
               <label className="block text-[0.8125rem] font-semibold text-brand-charcoal tracking-tight">
                 Phone Number
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-brand-charcoal-light">
-                  <Phone className="w-4 h-4" />
+              <div className={`flex rounded-xl border overflow-hidden transition-all duration-200 focus-within:ring-2 focus-within:ring-brand-emerald/15 focus-within:border-brand-emerald ${
+                errors.phone
+                  ? "border-red-300"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}>
+                {/* Country code selector */}
+                <div ref={dropRef} className="relative shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setShowCountryDrop((p) => !p)}
+                    className="flex items-center gap-1.5 h-full px-3 bg-gray-50 border-r border-gray-200 hover:bg-gray-100 transition-colors"
+                  >
+                    <img
+                      src={`https://flagcdn.com/w20/${selectedCountry.iso}.png`}
+                      alt={selectedCountry.name}
+                      width={20}
+                      height={14}
+                      className="rounded-sm object-cover"
+                    />
+                    <span className="text-sm font-medium text-brand-charcoal">{selectedCountry.code}</span>
+                    <svg className="w-3 h-3 text-brand-charcoal-light" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  </button>
+
+                  {showCountryDrop && (
+                    <div className="absolute top-full left-0 z-50 mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                      {COUNTRY_CODES.map((c) => (
+                        <button
+                          key={c.code}
+                          type="button"
+                          onClick={() => { setCountryCode(c.code); setShowCountryDrop(false); }}
+                          className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-gray-50 transition-colors ${
+                            c.code === countryCode ? "bg-brand-emerald/5 text-brand-emerald font-medium" : "text-brand-charcoal"
+                          }`}
+                        >
+                          <img
+                            src={`https://flagcdn.com/w20/${c.iso}.png`}
+                            alt={c.name}
+                            width={20}
+                            height={14}
+                            className="rounded-sm object-cover shrink-0"
+                          />
+                          <span>{c.name}</span>
+                          <span className="ml-auto text-brand-charcoal-light">{c.code}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
+                {/* Digits only input */}
                 <input
                   type="tel"
-                  placeholder="+91 98765 43210"
-                  autoComplete="tel"
-                  className={`w-full pl-10 pr-4 py-3 rounded-xl border text-sm text-brand-charcoal placeholder:text-brand-charcoal-light/60 outline-none transition-all duration-200 focus:ring-2 focus:ring-brand-emerald/15 focus:border-brand-emerald [&:-webkit-autofill]:![background-color:#ffffff] [&:-webkit-autofill]:[box-shadow:0_0_0_999px_white_inset] ${
-                    errors.phone
-                      ? "bg-white border-red-300 focus:border-red-400 focus:ring-red-100"
-                      : "bg-white border-gray-200 hover:border-gray-300"
-                  }`}
-                  {...register("phone")}
+                  inputMode="numeric"
+                  placeholder="98765 43210"
+                  autoComplete="tel-national"
+                  className="flex-1 px-3 py-3 text-sm text-brand-charcoal placeholder:text-brand-charcoal-light/60 outline-none bg-white [&:-webkit-autofill]:![background-color:#ffffff] [&:-webkit-autofill]:[box-shadow:0_0_0_999px_white_inset]"
+                  {...register("phone", {
+                    onChange: (e) => {
+                      // Strip any non-digit characters as user types
+                      e.target.value = e.target.value.replace(/\D/g, "");
+                    },
+                  })}
                 />
               </div>
               {errors.phone && (

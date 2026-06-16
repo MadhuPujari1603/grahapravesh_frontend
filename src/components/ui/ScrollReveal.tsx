@@ -44,8 +44,8 @@ export default function ScrollReveal({
   return (
     <div
       ref={ref}
-      className={`transition-all ${visible ? "opacity-100 translate-x-0 translate-y-0" : `opacity-0 ${offset}`} ${className ?? ""}`}
-      style={{ transitionDuration: `${duration * 1000}ms`, transitionDelay: `${delay * 1000}ms`, transitionTimingFunction: "cubic-bezier(0.4,0,0.2,1)" }}
+      className={`transition-[opacity,transform] ${visible ? "opacity-100 translate-x-0 translate-y-0" : `opacity-0 ${offset}`} ${className ?? ""}`}
+      style={{ transitionDuration: `${duration * 1000}ms`, transitionDelay: `${delay * 1000}ms`, transitionTimingFunction: "cubic-bezier(0.4,0,0.2,1)", willChange: visible ? "auto" : "opacity, transform" }}
     >
       {children}
     </div>
@@ -101,8 +101,8 @@ export function StaggerItem({ children, className, direction = "up", ...props }:
 
   return (
     <div
-      className={`transition-all ${visible ? "opacity-100 translate-x-0 translate-y-0" : `opacity-0 ${offset}`} ${className ?? ""}`}
-      style={{ transitionDuration: "500ms", transitionDelay: `${index * staggerDelay * 1000}ms`, transitionTimingFunction: "cubic-bezier(0.4,0,0.2,1)" }}
+      className={`transition-[opacity,transform] ${visible ? "opacity-100 translate-x-0 translate-y-0" : `opacity-0 ${offset}`} ${className ?? ""}`}
+      style={{ transitionDuration: "400ms", transitionDelay: `${index * staggerDelay * 1000}ms`, transitionTimingFunction: "cubic-bezier(0.4,0,0.2,1)", willChange: visible ? "auto" : "opacity, transform" }}
     >
       {children}
     </div>

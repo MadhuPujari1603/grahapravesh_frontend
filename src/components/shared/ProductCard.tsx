@@ -31,7 +31,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       : "/images/placeholder-product.svg";
 
   return (
-    <div className="group relative rounded-xl overflow-hidden flex flex-col border transition-all duration-200 hover:shadow-lg" style={{ background: "rgba(255,255,255,0.68)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderColor: "rgba(255,255,255,0.52)", boxShadow: "0 2px 16px 0 rgba(10,61,46,0.07), 0 1px 0 0 rgba(255,255,255,0.85) inset" }}>
+    <div className="group relative rounded-xl overflow-hidden flex flex-col border transition-shadow duration-200 hover:shadow-lg" style={{ background: "#ffffff", borderColor: "rgba(0,0,0,0.08)", boxShadow: "0 2px 12px 0 rgba(10,61,46,0.06)", willChange: "transform" }}>
       {/* Premium gradient border effect on hover */}
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-brand-emerald/0 via-brand-gold/0 to-brand-emerald/0 group-hover:from-brand-emerald/10 group-hover:via-brand-gold/5 group-hover:to-brand-emerald/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
       
@@ -43,7 +43,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             alt={product.name}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="object-contain group-hover:scale-110 transition-transform duration-700 ease-out"
+            className="object-contain group-hover:scale-105 transition-transform duration-300 ease-out"
             loading="lazy"
           />
 
@@ -57,11 +57,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 {discount}% OFF
               </span>
             )}
-            {product.isFeatured && (
-              <span className="bg-gradient-to-r from-brand-gold-dark via-brand-gold to-brand-gold-light text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-lg backdrop-blur-sm border border-brand-gold-light/30 transform group-hover:scale-105 transition-transform duration-300 animate-shimmer">
-                ✦ FEATURED
-              </span>
-            )}
+
             {product.stock === 0 && (
               <span className="bg-gradient-to-r from-gray-900 to-gray-800 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-lg backdrop-blur-sm">
                 SOLD OUT

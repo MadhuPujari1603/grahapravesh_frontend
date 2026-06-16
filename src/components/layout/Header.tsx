@@ -66,9 +66,9 @@ export default function Header() {
     <header
       className="sticky top-0 z-40"
       style={{
-        background: "rgba(240, 235, 224, 0.55)",
-        backdropFilter: "blur(24px) saturate(180%)",
-        WebkitBackdropFilter: "blur(24px) saturate(180%)",
+        background: "rgba(240, 235, 224, 0.96)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
         borderBottom: "1px solid rgba(255, 255, 255, 0.55)",
         boxShadow:
           "0 1px 0 rgba(255,255,255,0.7) inset, 0 4px 24px 0 rgba(10,61,46,0.08)",

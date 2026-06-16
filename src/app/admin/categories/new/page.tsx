@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, Upload, X } from "lucide-react";
+import { ArrowLeft, Upload, X, Star } from "lucide-react";
+import Toggle from "@/components/ui/Toggle";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
@@ -30,6 +31,7 @@ export default function NewCategoryPage() {
 
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [isFeatured, setIsFeatured] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(isEditing);
 
@@ -49,7 +51,8 @@ export default function NewCategoryPage() {
         .then((res) => {
           const cat = res.data.data;
           reset({ name: cat.name, description: cat.description || "" });
-          if (cat.image) setImagePreview(cat.image);
+          if (cat.imageUrl) setImagePreview(cat.imageUrl);
+          if (cat.isFeatured) setIsFeatured(true);
         })
         .catch(() => toast.error("Failed to load category"))
         .finally(() => setLoading(false));
@@ -73,6 +76,7 @@ export default function NewCategoryPage() {
       formData.append("name", data.name);
       if (data.description) formData.append("description", data.description);
       if (image) formData.append("image", image);
+      formData.append("isFeatured", String(isFeatured));
 
       if (isEditing) {
         await api.put(
@@ -168,6 +172,23 @@ export default function NewCategoryPage() {
                   />
                 </label>
               )}
+            </div>
+
+            {/* Featured toggle */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-amber-50/50">
+              <div>
+                <p className="text-sm font-semibold text-brand-charcoal flex items-center gap-2">
+                  <Star className={`w-4 h-4 ${isFeatured ? "fill-amber-500 text-amber-500" : "text-brand-charcoal-light"}`} />
+                  Featured Category
+                </p>
+                <p className="text-xs text-brand-charcoal-light mt-0.5">
+                  Featured categories appear in the homepage scroll strip
+                </p>
+              </div>
+              <Toggle
+                checked={isFeatured}
+                onChange={setIsFeatured}
+              />
             </div>
 
             <div className="flex gap-3 pt-2">

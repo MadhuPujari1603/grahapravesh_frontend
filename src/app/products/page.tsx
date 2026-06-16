@@ -239,7 +239,7 @@ function ProductsContent() {
                     key={filter.key}
                     onClick={() => handleQuickFilter(filter.key)}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                      "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all min-h-[40px]",
                       isActive
                         ? "bg-brand-emerald text-white shadow-sm"
                         : "bg-gray-100 text-brand-charcoal-medium hover:bg-gray-200"
@@ -399,7 +399,7 @@ function ProductsContent() {
                       {categories.find(c => c._id === currentCategory)?.name}
                       <button 
                         onClick={() => updateParams({ category: "" })}
-                        className="hover:bg-brand-emerald/20 rounded-full p-0.5"
+                        className="hover:bg-brand-emerald/20 rounded-full p-1.5"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -410,7 +410,7 @@ function ProductsContent() {
                       ₹{currentMinPrice || "0"} - ₹{currentMaxPrice || "∞"}
                       <button 
                         onClick={() => updateParams({ minPrice: "", maxPrice: "" })}
-                        className="hover:bg-brand-emerald/20 rounded-full p-0.5"
+                        className="hover:bg-brand-emerald/20 rounded-full p-1.5"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -421,7 +421,7 @@ function ProductsContent() {
                       In Stock
                       <button 
                         onClick={() => updateParams({ inStock: "" })}
-                        className="hover:bg-brand-emerald/20 rounded-full p-0.5"
+                        className="hover:bg-brand-emerald/20 rounded-full p-1.5"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -432,7 +432,7 @@ function ProductsContent() {
                       Featured
                       <button 
                         onClick={() => updateParams({ featured: "" })}
-                        className="hover:bg-brand-emerald/20 rounded-full p-0.5"
+                        className="hover:bg-brand-emerald/20 rounded-full p-1.5"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -442,7 +442,7 @@ function ProductsContent() {
               )}
 
               {isLoading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-6">
                   {Array.from({ length: 6 }).map((_, i) => (
                     <div
                       key={i}
@@ -462,7 +462,7 @@ function ProductsContent() {
                 </div>
               ) : products.length > 0 ? (
                 <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-6">
                     {products.map((product) => (
                       <ProductCard key={product._id} product={product} />
                     ))}

@@ -101,6 +101,7 @@ const useAuth = create<AuthState>()(
         });
         if (typeof window !== "undefined") {
           sessionStorage.removeItem("auth-token");
+          sessionStorage.removeItem("auth-storage");
         }
         toast.success("Logged out successfully");
       },

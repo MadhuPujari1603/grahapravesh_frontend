@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { ChevronDown, Search, HelpCircle, Package, CreditCard, Truck, RefreshCw, Shield, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 
 interface FAQItem {
   question: string;
@@ -44,7 +46,8 @@ export default function FAQPage() {
   const categoryIcons: Record<string, any> = { "Orders & Shipping": Truck, "Payments": CreditCard, "Returns & Refunds": RefreshCw, "Products": Package, "Account": Shield };
 
   return (
-    <div className="min-h-screen bg-brand-cream-light">
+    <div className="min-h-screen flex flex-col bg-brand-cream-light">
+      <Header />
       <section className="bg-gradient-to-br from-brand-emerald-dark to-brand-emerald text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto relative">
@@ -99,6 +102,7 @@ export default function FAQPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

@@ -6,6 +6,8 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import api from "@/lib/axios";
 import { API_ENDPOINTS } from "@/lib/constants";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -45,7 +47,8 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-brand-cream-light">
+    <div className="min-h-screen flex flex-col bg-brand-cream-light">
+      <Header />
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-brand-emerald-dark to-brand-emerald text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -315,6 +318,7 @@ export default function ContactPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

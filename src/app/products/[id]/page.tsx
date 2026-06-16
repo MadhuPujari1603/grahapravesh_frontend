@@ -186,18 +186,34 @@ export default function ProductDetailPage() {
   }, [id, fetchProduct]);
 
   useEffect(() => {
-    if (product && typeof product.categoryId === "object") {
+    if (product) {
+      const categoryId =
+        typeof product.categoryId === "object"
+          ? (product.categoryId as Category)._id
+          : null;
+
+      const fetchUrl = categoryId
+        ? `${API_ENDPOINTS.PRODUCTS_BY_CATEGORY(categoryId)}&limit=5`
+        : `${API_ENDPOINTS.PRODUCTS}?limit=5`;
+
       api
-        .get(
-          `${API_ENDPOINTS.PRODUCTS_BY_CATEGORY(
-            (product.categoryId as Category)._id
-          )}&limit=5`
-        )
+        .get(fetchUrl)
         .then((res) => {
-          const related = (res.data.data || []).filter(
-            (p: Product) => p._id !== product._id
-          );
-          setRelatedProducts(related.slice(0, 4));
+          const all: Product[] = res.data.data || [];
+          let related = all.filter((p) => p._id !== product._id).slice(0, 4);
+
+          // Fallback: if same-category gave nothing, fetch from all products
+          if (related.length === 0 && categoryId) {
+            return api
+              .get(`${API_ENDPOINTS.PRODUCTS}?limit=5`)
+              .then((r) => {
+                const fallback = (r.data.data || []).filter(
+                  (p: Product) => p._id !== product._id
+                );
+                setRelatedProducts(fallback.slice(0, 4));
+              });
+          }
+          setRelatedProducts(related);
         })
         .catch(() => {});
     }
@@ -424,13 +440,13 @@ export default function ProductDetailPage() {
                   <>
                     <button
                       onClick={() => setSelectedImage(selectedImage > 0 ? selectedImage - 1 : images.length - 1)}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all border border-white/40"
+                      className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all border border-white/40"
                     >
                       <ChevronLeft className="w-4 h-4 text-brand-charcoal" />
                     </button>
                     <button
                       onClick={() => setSelectedImage(selectedImage < images.length - 1 ? selectedImage + 1 : 0)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all border border-white/40"
+                      className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all border border-white/40"
                     >
                       <ChevronRight className="w-4 h-4 text-brand-charcoal" />
                     </button>
@@ -552,11 +568,11 @@ export default function ProductDetailPage() {
                       <span className="text-[11px] font-black text-brand-gold uppercase tracking-[0.22em]">
                         Personalise
                       </span>
-                      <p className="text-[9px] text-white/35 mt-0 normal-case tracking-normal font-normal leading-tight">
+                      <p className="text-[10px] text-white/35 mt-0 normal-case tracking-normal font-normal leading-tight">
                         Optional — leave blank to order as-is
                       </p>
                     </div>
-                    <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
+                    <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
                       {product.customizationFields.length} field{product.customizationFields.length > 1 ? "s" : ""}
                     </span>
                   </div>
@@ -570,10 +586,10 @@ export default function ProductDetailPage() {
                       return (
                         <div key={field.fieldName}>
                           <div className="flex items-center justify-between mb-1">
-                            <label className="text-[9px] font-black text-white/50 uppercase tracking-[0.18em]">
+                            <label className="text-[11px] font-black text-white/50 uppercase tracking-[0.18em]">
                               {field.label}
                             </label>
-                            <span className={`text-[9px] font-bold tabular-nums ${
+                            <span className={`text-[10px] font-bold tabular-nums ${
                               val.length >= maxLen ? "text-red-400" : "text-white/25"
                             }`}>
                               {val.length}/{maxLen}
@@ -791,8 +807,8 @@ export default function ProductDetailPage() {
           ══════════════════════════════════════ */}
           <div className="mt-16 border-t border-[#e0d8cc]">
 
-            {/* Tab nav */}
-            <div className="flex items-center gap-0 border-b border-[#e0d8cc] mt-0">
+            {/* Tab nav — horizontal scroll on mobile so tabs never overflow */}
+            <div className="flex items-center gap-0 border-b border-[#e0d8cc] mt-0 overflow-x-auto scrollbar-hide">
               {(["description", "specs", "reviews"] as const).map((tab) => {
                 const labels: Record<string, string> = {
                   description: "Description",
@@ -803,7 +819,7 @@ export default function ProductDetailPage() {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-6 sm:px-8 py-4 text-xs font-black uppercase tracking-widest transition-all duration-200 border-b-2 -mb-px ${
+                    className={`px-4 sm:px-8 py-4 text-xs font-black uppercase tracking-widest transition-all duration-200 border-b-2 -mb-px whitespace-nowrap shrink-0 ${
                       activeTab === tab
                         ? "text-brand-emerald border-brand-gold"
                         : "text-brand-charcoal-light border-transparent hover:text-brand-charcoal"

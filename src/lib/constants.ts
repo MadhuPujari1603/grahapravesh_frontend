@@ -3,6 +3,9 @@ export const API_ENDPOINTS = {
   AUTH_LOGIN: "/auth/login",
   AUTH_SIGNUP: "/auth/signup",
   AUTH_PROFILE: "/auth/profile",
+  AUTH_FORGOT_PASSWORD: "/auth/forgot-password",
+  AUTH_VERIFY_OTP: "/auth/verify-otp",
+  AUTH_RESET_PASSWORD: "/auth/reset-password",
 
   // Products
   PRODUCTS: "/products",
