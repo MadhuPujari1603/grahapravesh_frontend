@@ -300,7 +300,7 @@ export default function HomePage() {
 
           {/* scroll hint */}
           <div className="absolute bottom-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-28 pointer-events-none">
-            <span className="text-[9px] text-white uppercase tracking-[0.28em]">
+            <span className="text-[10px] text-white uppercase tracking-[0.28em]">
               Scroll
             </span>
             <div className="w-px h-9 bg-gradient-to-b from-white/70 to-transparent" />

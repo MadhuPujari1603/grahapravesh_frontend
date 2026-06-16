@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Truck, Save, ToggleLeft, ToggleRight, Info } from "lucide-react";
+import { Truck, Save, Info } from "lucide-react";
+import Toggle from "@/components/ui/Toggle";
 import api from "@/lib/axios";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { formatPrice } from "@/lib/utils";
@@ -153,17 +154,10 @@ export default function AdminSettingsPage() {
                 When enabled, orders above the threshold get free delivery.
               </p>
             </div>
-            <button
-              onClick={() => setIsFreeShippingEnabled((p) => !p)}
-              className="shrink-0 mt-0.5"
-              title="Toggle free shipping"
-            >
-              {isFreeShippingEnabled ? (
-                <ToggleRight className="w-8 h-8 text-brand-emerald" />
-              ) : (
-                <ToggleLeft className="w-8 h-8 text-brand-charcoal-light" />
-              )}
-            </button>
+            <Toggle
+              checked={isFreeShippingEnabled}
+              onChange={setIsFreeShippingEnabled}
+            />
           </div>
 
           {/* Threshold input */}

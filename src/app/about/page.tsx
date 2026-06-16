@@ -357,49 +357,71 @@ export default function AboutPage() {
             </ScrollReveal>
 
             <div className="relative">
-              {/* Vertical Line */}
-              <div className="absolute left-6 sm:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-brand-gold via-brand-emerald to-brand-gold" />
+              {/* Vertical line — left on mobile, center on desktop */}
+              <div className="absolute left-4 sm:left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2 bg-gradient-to-b from-brand-gold via-brand-emerald to-brand-gold opacity-40" />
 
-              {founderJourney.map((milestone, idx) => (
-                <ScrollReveal
-                  key={milestone.year}
-                  direction={idx % 2 === 0 ? "left" : "right"}
-                  delay={idx * 0.15}
-                >
-                  <div
-                    className={`relative flex items-start gap-8 mb-12 last:mb-0 ${
-                      idx % 2 === 0 ? "sm:flex-row" : "sm:flex-row-reverse"
-                    }`}
+              <div className="space-y-8">
+                {founderJourney.map((milestone, idx) => (
+                  <ScrollReveal
+                    key={milestone.year}
+                    direction={idx % 2 === 0 ? "left" : "right"}
+                    delay={idx * 0.12}
                   >
-                    <div
-                      className={`flex-1 pl-16 sm:pl-0 ${
-                        idx % 2 === 0
-                          ? "sm:pr-16 sm:text-right"
-                          : "sm:pl-16 sm:text-left"
-                      }`}
-                    >
-                      <div className="group rounded-xl p-5 hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden relative border backdrop-blur-sm" style={{ background: 'rgba(255,255,255,0.65)', borderColor: 'rgba(255,255,255,0.50)', boxShadow: '0 2px 16px 0 rgba(10,61,46,0.06)' }}>
-                        <div className="absolute inset-0 bg-gradient-to-br from-brand-emerald/0 to-brand-gold/0 group-hover:from-brand-emerald/5 group-hover:to-brand-gold/5 transition-all duration-500" />
-                        <div className="relative">
-                          <span className="text-xs font-bold text-brand-gold-dark uppercase tracking-widest group-hover:text-brand-gold transition-colors duration-300">
-                            {milestone.year}
-                          </span>
-                          <h3 className="text-lg font-bold text-brand-charcoal mt-1 mb-2 group-hover:text-brand-emerald-dark transition-colors duration-300">
-                            {milestone.title}
-                          </h3>
-                          <p className="text-sm text-brand-charcoal-medium leading-relaxed group-hover:text-brand-charcoal transition-colors duration-300">
-                            {milestone.description}
-                          </p>
-                        </div>
-                        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-brand-emerald to-brand-gold scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-700" />
+                    {/* ── Mobile: single column, card full width ── */}
+                    <div className="sm:hidden relative pl-10">
+                      {/* Dot */}
+                      <div className="absolute left-4 top-5 w-3 h-3 rounded-full bg-brand-emerald border-2 border-white shadow -translate-x-1/2" />
+                      <div className="group rounded-xl p-4 border"
+                        style={{ background: 'rgba(255,255,255,0.75)', borderColor: 'rgba(255,255,255,0.55)', boxShadow: '0 2px 12px rgba(10,61,46,0.07)' }}>
+                        <span className="text-[10px] font-black text-brand-gold-dark uppercase tracking-widest">
+                          {milestone.year}
+                        </span>
+                        <h3 className="text-base font-bold text-brand-charcoal mt-1 mb-1.5">
+                          {milestone.title}
+                        </h3>
+                        <p className="text-sm text-brand-charcoal-medium leading-relaxed">
+                          {milestone.description}
+                        </p>
+                        <div className="absolute bottom-0 left-0 right-0 h-[2px] rounded-b-xl bg-gradient-to-r from-brand-emerald to-brand-gold scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-700" />
                       </div>
                     </div>
 
-                    <div className="absolute left-6 sm:left-1/2 w-4 h-4 rounded-full bg-brand-emerald-dark border-4 border-white shadow-lg transform -translate-x-2 mt-8 animate-pulse" />
-                    <div className="hidden sm:block flex-1" />
-                  </div>
-                </ScrollReveal>
-              ))}
+                    {/* ── Desktop: alternating left / right ── */}
+                    <div className={`hidden sm:grid grid-cols-[1fr_32px_1fr] items-start gap-0`}>
+                      {/* Left slot */}
+                      {idx % 2 === 0 ? (
+                        <div className="group rounded-xl p-5 border mr-6 text-right"
+                          style={{ background: 'rgba(255,255,255,0.75)', borderColor: 'rgba(255,255,255,0.55)', boxShadow: '0 2px 16px rgba(10,61,46,0.07)' }}>
+                          <span className="text-[10px] font-black text-brand-gold-dark uppercase tracking-widest">{milestone.year}</span>
+                          <h3 className="text-base font-bold text-brand-charcoal mt-1 mb-2 group-hover:text-brand-emerald-dark transition-colors">{milestone.title}</h3>
+                          <p className="text-sm text-brand-charcoal-medium leading-relaxed">{milestone.description}</p>
+                          <div className="absolute bottom-0 left-0 right-0 h-[2px] rounded-b-xl bg-gradient-to-r from-brand-emerald to-brand-gold scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-700" />
+                        </div>
+                      ) : (
+                        <div />
+                      )}
+
+                      {/* Centre dot */}
+                      <div className="flex flex-col items-center pt-5">
+                        <div className="w-3.5 h-3.5 rounded-full bg-brand-emerald border-[3px] border-white shadow-md shrink-0" />
+                      </div>
+
+                      {/* Right slot */}
+                      {idx % 2 !== 0 ? (
+                        <div className="group rounded-xl p-5 border ml-6 text-left"
+                          style={{ background: 'rgba(255,255,255,0.75)', borderColor: 'rgba(255,255,255,0.55)', boxShadow: '0 2px 16px rgba(10,61,46,0.07)' }}>
+                          <span className="text-[10px] font-black text-brand-gold-dark uppercase tracking-widest">{milestone.year}</span>
+                          <h3 className="text-base font-bold text-brand-charcoal mt-1 mb-2 group-hover:text-brand-emerald-dark transition-colors">{milestone.title}</h3>
+                          <p className="text-sm text-brand-charcoal-medium leading-relaxed">{milestone.description}</p>
+                          <div className="absolute bottom-0 left-0 right-0 h-[2px] rounded-b-xl bg-gradient-to-r from-brand-emerald to-brand-gold scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-700" />
+                        </div>
+                      ) : (
+                        <div />
+                      )}
+                    </div>
+                  </ScrollReveal>
+                ))}
+              </div>
             </div>
           </div>
         </section>

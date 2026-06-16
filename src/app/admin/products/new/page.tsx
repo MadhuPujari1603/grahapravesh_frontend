@@ -12,6 +12,7 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { KeyFeaturesEditor, SpecificationsEditor } from "@/components/admin/ProductExtrasEditor";
 import { CustomizationFieldsEditor } from "@/components/admin/CustomizationFieldsEditor";
+import Toggle from "@/components/ui/Toggle";
 import api from "@/lib/axios";
 import { API_ENDPOINTS } from "@/lib/constants";
 import { Category, KeyFeature, Specification, CustomizationField } from "@/types";
@@ -268,19 +269,10 @@ export default function NewProductPage() {
                       Let customers add custom text (name, flat number, etc.) for personalised products.
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsCustomizable(!isCustomizable)}
-                    className={`w-12 h-6 rounded-full relative transition-colors duration-200 focus:outline-none shrink-0 ${
-                      isCustomizable ? "bg-brand-emerald" : "bg-gray-300"
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${
-                        isCustomizable ? "translate-x-7" : "translate-x-1"
-                      }`}
-                    />
-                  </button>
+                  <Toggle
+                    checked={isCustomizable}
+                    onChange={setIsCustomizable}
+                  />
                 </div>
               </div>
               {isCustomizable && (

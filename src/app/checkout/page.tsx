@@ -40,7 +40,7 @@ export default function CheckoutPage() {
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [showNewAddress, setShowNewAddress] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"cod" | "razorpay">("cod");
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "razorpay">("razorpay");
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [successOrder, setSuccessOrder] = useState<any>(null);
   const [placing, setPlacing] = useState(false);
@@ -575,31 +575,6 @@ export default function CheckoutPage() {
                 <div className="space-y-3">
                   <label
                     className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-colors ${
-                      paymentMethod === "cod"
-                        ? "border-brand-emerald bg-brand-emerald/5"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="payment"
-                      checked={paymentMethod === "cod"}
-                      onChange={() => setPaymentMethod("cod")}
-                      className="accent-brand-emerald"
-                    />
-                    <Banknote className="w-6 h-6 text-brand-charcoal-medium" />
-                    <div>
-                      <p className="font-medium text-sm text-brand-charcoal">
-                        Cash on Delivery
-                      </p>
-                      <p className="text-xs text-brand-charcoal-light">
-                        Pay when your order is delivered
-                      </p>
-                    </div>
-                  </label>
-
-                  <label
-                    className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-colors ${
                       paymentMethod === "razorpay"
                         ? "border-brand-emerald bg-brand-emerald/5"
                         : "border-gray-200 hover:border-gray-300"
@@ -702,9 +677,7 @@ export default function CheckoutPage() {
                   isLoading={placing}
                   disabled={!selectedAddress}
                 >
-                  {paymentMethod === "cod"
-                    ? "Place Order (COD)"
-                    : "Pay & Place Order"}
+                  Pay & Place Order
                 </Button>
 
                 <p className="text-[11px] text-brand-charcoal-light text-center mt-3">

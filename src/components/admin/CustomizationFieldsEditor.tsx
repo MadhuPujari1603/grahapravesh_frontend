@@ -3,6 +3,7 @@
 import React from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { CustomizationField } from "@/types";
+import Toggle from "@/components/ui/Toggle";
 
 interface CustomizationFieldsEditorProps {
   value: CustomizationField[];
@@ -152,19 +153,11 @@ export function CustomizationFieldsEditor({
 
               {/* Required toggle */}
               <div className="flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => updateField(index, "required", !field.required)}
-                  className={`w-10 h-5 rounded-full relative transition-colors duration-200 focus:outline-none ${
-                    field.required ? "bg-brand-emerald" : "bg-gray-300"
-                  }`}
-                >
-                  <span
-                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${
-                      field.required ? "translate-x-5" : "translate-x-0.5"
-                    }`}
-                  />
-                </button>
+                <Toggle
+                  checked={!!field.required}
+                  onChange={(v) => updateField(index, "required", v)}
+                  size="sm"
+                />
               </div>
 
               {/* Remove */}

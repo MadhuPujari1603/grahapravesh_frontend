@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2, Grid3X3, Star } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -14,6 +15,7 @@ import { Category } from "@/types";
 import toast from "react-hot-toast";
 
 export default function AdminCategoriesPage() {
+  const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -77,7 +79,7 @@ export default function AdminCategoriesPage() {
           title="No Categories"
           description="Create your first category to organize your products."
           actionLabel="Add Category"
-          onAction={() => (window.location.href = "/admin/categories/new")}
+          onAction={() => router.push("/admin/categories/new")}
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
