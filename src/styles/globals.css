@@ -113,7 +113,7 @@
     box-shadow: 0 2px 16px 0 rgba(10, 61, 46, 0.06),
                 0 1px 0 0 rgba(255, 255, 255, 0.8) inset;
     border-radius: 0.75rem;
-    transition: all 0.2s ease;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
   }
   .glass-hover:hover {
     background: rgba(255, 255, 255, 0.92);
@@ -168,7 +168,7 @@
     border: 1px solid rgba(255, 255, 255, 0.5);
     box-shadow: 0 2px 16px 0 rgba(10, 61, 46, 0.06);
     border-radius: 0.75rem;
-    transition: all 0.2s ease;
+    transition: box-shadow 0.2s ease;
   }
 
   /* ══════════════════════════════════════════════════

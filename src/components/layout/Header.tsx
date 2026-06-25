@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   ShoppingCart,
+  Heart,
   User,
   UserCircle,
   Menu,
@@ -18,6 +19,7 @@ import {
 import { NAV_LINKS } from "@/lib/constants";
 import useAuth from "@/hooks/useAuth";
 import useCart from "@/hooks/useCart";
+import useWishlist from "@/hooks/useWishlist";
 
 export default function Header() {
   const [mounted, setMounted] = useState(false);
@@ -30,6 +32,7 @@ export default function Header() {
 
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const cartCount = useCart((s) => s.cartCount);
+  const wishlistCount = useWishlist((s) => s.count);
 
   useEffect(() => setMounted(true), []);
 
@@ -113,19 +116,33 @@ export default function Header() {
             {/* Search */}
             <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 rounded-lg text-brand-charcoal-medium hover:bg-white/50 transition-colors"
+              className="p-3 rounded-lg text-brand-charcoal-medium hover:bg-white/50 transition-colors"
               aria-label="Search"
             >
-              <Search className="w-4 h-4" />
+              <Search className="w-6 h-6" />
             </button>
+
+            {/* Wishlist */}
+            <Link
+              href="/wishlist"
+              className="relative p-2.5 rounded-lg text-brand-charcoal-medium hover:bg-white/50 transition-colors"
+              aria-label="Wishlist"
+            >
+              <Heart className="w-5 h-5" />
+              {mounted && wishlistCount() > 0 && (
+                <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {wishlistCount() > 9 ? "9+" : wishlistCount()}
+                </span>
+              )}
+            </Link>
 
             {/* Cart */}
             <Link
               href="/cart"
-              className="relative p-2 rounded-lg text-brand-charcoal-medium hover:bg-white/50 transition-colors"
+              className="relative p-3 rounded-lg text-brand-charcoal-medium hover:bg-white/50 transition-colors"
               aria-label="Shopping Cart"
             >
-              <ShoppingCart className="w-4 h-4" />
+              <ShoppingCart className="w-6 h-6" />
               {mounted && cartCount() > 0 && (
                 <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 bg-brand-emerald text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                   {cartCount() > 9 ? "9+" : cartCount()}

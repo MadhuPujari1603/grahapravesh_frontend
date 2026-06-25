@@ -1,27 +1,52 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Compress responses
   compress: true,
+  swcMinify: true,
 
-  // Serve modern image formats (WebP / AVIF) — huge savings on mobile
   images: {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [360, 480, 640, 750, 828, 1080, 1200],
     imageSizes: [64, 128, 192, 256, 384],
-    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days browser cache
     remotePatterns: [
       { protocol: "https", hostname: "*.blob.core.windows.net" },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "via.placeholder.com" },
+      { protocol: "https", hostname: "flagcdn.com" },
     ],
   },
 
-  // Remove unused JS in production
-  swcMinify: true,
-
-  // Reduce package size — only import what's needed from lucide-react
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
+  },
+
+  // CDN & browser cache headers
+  async headers() {
+    return [
+      {
+        // Static assets — 1 year immutable cache
+        source: "/:path*.(js|css|woff|woff2|ttf|otf|ico|svg)",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
+        // Images — 30 day cache
+        source: "/:path*.(jpg|jpeg|png|gif|webp|avif)",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=2592000, stale-while-revalidate=86400" },
+        ],
+      },
+      {
+        // HTML pages — revalidate quickly
+        source: "/(.*)",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
+    ];
   },
 
   env: {

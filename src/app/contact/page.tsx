@@ -25,17 +25,16 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) return;
+    if (!formData.name.trim() || !formData.phone.trim() || !formData.message.trim()) return;
     setLoading(true);
     try {
       await api.post(API_ENDPOINTS.CONTACT_SUBMIT, {
         name: formData.name.trim(),
-        email: formData.email.trim(),
-        message: [
-          formData.subject ? `Subject: ${formData.subject}` : null,
-          formData.phone ? `Phone: ${formData.phone}` : null,
-          formData.message.trim(),
-        ].filter(Boolean).join("\n"),
+        email: formData.email.trim() || undefined,
+        phone: formData.phone.trim(),
+        message: formData.subject
+          ? `Subject: ${formData.subject}\n${formData.message.trim()}`
+          : formData.message.trim(),
       });
       toast.success("Thank you! We'll get back to you within 24 hours.");
       setFormData({ name: "", email: "", phone: "", subject: "", message: "" });

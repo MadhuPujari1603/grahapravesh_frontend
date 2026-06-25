@@ -31,6 +31,7 @@ import Spinner from "@/components/ui/Spinner";
 import Pagination from "@/components/ui/Pagination";
 import useProducts from "@/hooks/useProducts";
 import useCart from "@/hooks/useCart";
+import useWishlist from "@/hooks/useWishlist";
 import { Category, Product, Review, User } from "@/types";
 import api from "@/lib/axios";
 import { API_ENDPOINTS } from "@/lib/constants";
@@ -55,7 +56,7 @@ function RelatedCard({ product }: { product: Product }) {
         <img
           src={imageUrl}
           alt={product.name}
-          className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+          className="w-full aspect-[4/3] object-contain bg-white group-hover:scale-105 transition-transform duration-700 ease-out"
         />
       </div>
       {category && (
@@ -159,11 +160,11 @@ export default function ProductDetailPage() {
 
   const { product, isLoading, fetchProduct } = useProducts();
   const addToCart = useCart((s) => s.addToCart);
+  const { toggle: toggleWishlist, isWishlisted } = useWishlist();
 
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
   const [pincode, setPincode] = useState("");
@@ -402,15 +403,9 @@ export default function ProductDetailPage() {
             {/* ── LEFT: Gallery ── */}
             <div className="flex flex-col gap-4">
               {/* Main image */}
-              <div className="relative overflow-hidden bg-[#e8e0d0] group">
-                <img
-                  src={images[selectedImage]}
-                  alt={product.name}
-                  className="w-full aspect-[4/3] sm:aspect-[5/4] object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                />
-
-                {/* Badges */}
-                <div className="absolute top-5 left-5 flex flex-col gap-2">
+              {/* Badges — outside image, in normal flow, never overlaps */}
+              {(discount > 0 || (product.stock > 0 && product.stock <= 10)) && (
+                <div className="flex gap-2 flex-wrap">
                   {discount > 0 && (
                     <span className="bg-brand-gold text-white text-[11px] font-bold px-3 py-1.5 uppercase tracking-wider">
                       {discount}% Off
@@ -422,55 +417,30 @@ export default function ProductDetailPage() {
                     </span>
                   )}
                 </div>
+              )}
+
+              <div className="relative overflow-hidden bg-white group">
+                <img
+                  src={images[selectedImage]}
+                  alt={product.name}
+                  className="w-full object-contain transition-transform duration-700 group-hover:scale-[1.03]"
+                  style={{ display: "block" }}
+                />
 
                 {/* Wishlist */}
                 <button
-                  onClick={() => setIsWishlisted(!isWishlisted)}
+                  onClick={() => product && toggleWishlist(product)}
                   className={`absolute top-5 right-5 w-10 h-10 flex items-center justify-center transition-all duration-200 border ${
-                    isWishlisted
+                    product && isWishlisted(product._id)
                       ? "bg-red-500 border-red-500 text-white"
-                      : "bg-white/80 border-white/60 text-brand-charcoal-medium hover:bg-white hover:text-red-400 backdrop-blur-sm"
+                      : "bg-white/80 border-white/60 text-brand-charcoal-medium hover:bg-white hover:text-red-400"
                   }`}
+                  aria-label={product && isWishlisted(product._id) ? "Remove from wishlist" : "Add to wishlist"}
                 >
-                  <Heart className={`w-4 h-4 ${isWishlisted ? "fill-current" : ""}`} />
+                  <Heart className={`w-4 h-4 ${product && isWishlisted(product._id) ? "fill-current" : ""}`} />
                 </button>
 
-                {/* Nav arrows */}
-                {images.length > 1 && (
-                  <>
-                    <button
-                      onClick={() => setSelectedImage(selectedImage > 0 ? selectedImage - 1 : images.length - 1)}
-                      className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all border border-white/40"
-                    >
-                      <ChevronLeft className="w-4 h-4 text-brand-charcoal" />
-                    </button>
-                    <button
-                      onClick={() => setSelectedImage(selectedImage < images.length - 1 ? selectedImage + 1 : 0)}
-                      className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all border border-white/40"
-                    >
-                      <ChevronRight className="w-4 h-4 text-brand-charcoal" />
-                    </button>
-                  </>
-                )}
-
-                {/* Floating inset thumbnails — bottom right */}
-                {images.length > 1 && (
-                  <div className="absolute bottom-4 right-4 flex gap-2">
-                    {images.slice(1, 3).map((img, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setSelectedImage(i + 1)}
-                        className={`w-[72px] h-[60px] overflow-hidden border-2 transition-all ${
-                          selectedImage === i + 1
-                            ? "border-brand-gold"
-                            : "border-white/70 hover:border-brand-gold/60"
-                        }`}
-                      >
-                        <img src={img} alt="" className="w-full h-full object-cover" />
-                      </button>
-                    ))}
-                  </div>
-                )}
+                {/* No nav arrows — click thumbnails below to switch */}
               </div>
 
               {/* Thumbnail strip */}
@@ -486,7 +456,7 @@ export default function ProductDetailPage() {
                           : "border-transparent hover:border-brand-gold/50 opacity-60 hover:opacity-100"
                       }`}
                     >
-                      <img src={img} alt="" className="w-full h-full object-cover" />
+                      <img src={img} alt="" className="w-full h-full object-contain bg-white" />
                     </button>
                   ))}
                 </div>
@@ -655,13 +625,13 @@ export default function ProductDetailPage() {
 
                     {/* Wishlist — minimal */}
                     <button
-                      onClick={() => setIsWishlisted(!isWishlisted)}
+                      onClick={() => product && toggleWishlist(product)}
                       className={`w-full py-1.5 text-[10px] font-semibold uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 ${
-                        isWishlisted ? "text-red-400" : "text-white/30 hover:text-white/50"
+                        product && isWishlisted(product._id) ? "text-red-400" : "text-white/30 hover:text-white/50"
                       }`}
                     >
-                      <Heart className={`w-3 h-3 ${isWishlisted ? "fill-current" : ""}`} />
-                      {isWishlisted ? "Saved" : "Save to Wishlist"}
+                      <Heart className={`w-3 h-3 ${product && isWishlisted(product._id) ? "fill-current" : ""}`} />
+                      {product && isWishlisted(product._id) ? "Saved" : "Save to Wishlist"}
                     </button>
                   </div>
                 </div>
@@ -718,13 +688,13 @@ export default function ProductDetailPage() {
                         Instant Purchase
                       </button>
                       <button
-                        onClick={() => setIsWishlisted(!isWishlisted)}
+                        onClick={() => product && toggleWishlist(product)}
                         className={`w-full py-2.5 text-xs font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
-                          isWishlisted ? "text-red-500" : "text-brand-charcoal-light hover:text-brand-charcoal"
+                          product && isWishlisted(product._id) ? "text-red-500" : "text-brand-charcoal-light hover:text-brand-charcoal"
                         }`}
                       >
-                        <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "fill-current" : ""}`} />
-                        {isWishlisted ? "Saved to Wishlist" : "Add to Wishlist"}
+                        <Heart className={`w-3.5 h-3.5 ${product && isWishlisted(product._id) ? "fill-current" : ""}`} />
+                        {product && isWishlisted(product._id) ? "Saved to Wishlist" : "Add to Wishlist"}
                       </button>
                     </>
                   ) : (
@@ -734,6 +704,29 @@ export default function ProductDetailPage() {
                   )}
                 </div>
               )}
+
+              {/* ── Chat with Expert → WhatsApp ── */}
+              <div className="mt-4 mb-1">
+                <p className="text-xs text-brand-charcoal-light text-center mb-2.5">
+                  Need help with customization, shipping, or a mockup?
+                </p>
+                <a
+                  href={`https://wa.me/918762625888?text=${encodeURIComponent(
+                    `Hi! I'm interested in this product:\n\n*${product.name}*\n${typeof window !== "undefined" ? window.location.href : `https://www.grahapraveshnameplate.com/products/${product._id}`}\n\nPlease help me with customization details.`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl font-bold text-sm text-white transition-all active:scale-[0.98]"
+                  style={{ background: "#25D366" }}
+                >
+                  {/* WhatsApp icon */}
+                  <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white shrink-0">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.115.554 4.1 1.523 5.824L.057 23.999l6.305-1.54A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-5.001-1.371l-.359-.213-3.722.975.993-3.63-.234-.373A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182c5.43 0 9.818 4.388 9.818 9.818 0 5.43-4.388 9.818-9.818 9.818z"/>
+                  </svg>
+                  Chat with a Style Expert
+                </a>
+              </div>
 
               {/* Delivery check */}
               <div className="space-y-2 mt-5">
